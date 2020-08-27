@@ -37,9 +37,35 @@ const puppeteer = require('puppeteer');
       }
       return AmazonTitles;
     }
+    const extractBDTitles = async (url) => {
+      const bookDepository = await browser.newPage();
+      await bookDepository.goto(url);
+      const bookDepositoryTitles = await bookDepository.evaluate(() =>
+           Array.from(document.querySelectorAll('h3.title'))
+           .map(b => b.innerText.trim(''))         
+      );
+      await bookDepository.close();
+      console.log(bookDepositoryTitles);
+      if (bookDepositoryTitles.length < 1) {
+        return bookDepositoryTitles
+      } else {
+        // Go fetch the next page ?page=X+1
+        const nextPageNumber = parseInt(url.match(/page=(\d+)$/)[1], 10) + 1;
+        const nextUrl = `https://www.bookdepository.com/bestsellers?page=${nextPageNumber}`;
+  
+        return bookDepositoryTitles.concat(await extractBDTitles(nextUrl))
+      }
+      return bookDepositoryTitles;
+    }
+
     const browser = await puppeteer.launch();
-    const url = 'https://www.amazon.com/best-sellers-books-Amazon/zgbs/books/ref=zg_bs_pg_2?_encoding=UTF8&pg=1'; 
-    const Amazonresult = await extractAmazonTitles(url);
+    const amzurl = 'https://www.amazon.com/best-sellers-books-Amazon/zgbs/books/ref=zg_bs_pg_2?_encoding=UTF8&pg=1'; 
+    const Amazonresult = await extractAmazonTitles(amzurl);
     console.log(Amazonresult);
+
+    // const bdurl = 'https://www.bookdepository.com/bestsellers?page=1'; 
+    // const bookDepositoryResult = await extractBDTitles(bdurl);
+    // console.log(bookDepositoryResult);
+
   await browser.close();
 })();
