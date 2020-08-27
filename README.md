@@ -1,2 +1,2 @@
 # Scrapper
-Scrapping bestseller books from bookdepository and amazon using puppeteer js
+Scrapping bestseller books from bookdepository and amazon using nodejs & puppeteer.js
